@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hungarian Grade Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* Neon color variables */
+        :root {
+            --neon-green: #00ff88;
+            --neon-blue: #00d4ff;
+            --neon-purple: #b300ff;
+            --neon-yellow: #ffff00;
+            --neon-orange: #ff6600;
+            --neon-red: #ff0066;
+            --neon-green-glow: rgba(0, 255, 136, 0.3);
+            --neon-blue-glow: rgba(0, 212, 255, 0.3);
+            --neon-purple-glow: rgba(179, 0, 255, 0.3);
+            --neon-yellow-glow: rgba(255, 255, 0, 0.3);
+            --neon-orange-glow: rgba(255, 102, 0, 0.3);
+            --neon-red-glow: rgba(255, 0, 102, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            transform: translateZ(0); /* Hardware acceleration */
+        }
+
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-green-glow),
+                        0 0 50px var(--neon-blue-glow),
+                        0 0 70px var(--neon-purple-glow);
+            position: relative;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
+            border-radius: 55px;
+            z-index: -1;
+            filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px var(--neon-green-glow);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue-glow);
+        }
+
+        /* Bubbly containers */
+        .grade-info, .calculator-section, .table-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            will-change: transform;
+        }
+
+        .grade-info {
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green-glow),
+                        0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .calculator-section.blue-theme {
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 30px var(--neon-blue-glow),
+                        0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .calculator-section.green-theme {
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green-glow),
+                        0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-section.yellow-theme {
+            border: 2px solid var(--neon-yellow);
+            box-shadow: 0 0 30px var(--neon-yellow-glow),
+                        0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .grade-scale {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .grade-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 30px;
+            padding: 20px;
+            text-align: center;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grade-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .grade-item:hover::before {
+            left: 100%;
+        }
+
+        .grade-item:nth-child(1) {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green-glow);
+        }
+
+        .grade-item:nth-child(2) {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px var(--neon-blue-glow);
+        }
+
+        .grade-item:nth-child(3) {
+            border-color: var(--neon-yellow);
+            box-shadow: 0 0 20px var(--neon-yellow-glow);
+        }
+
+        .grade-item:nth-child(4) {
+            border-color: var(--neon-orange);
+            box-shadow: 0 0 20px var(--neon-orange-glow);
+        }
+
+        .grade-item:nth-child(5) {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 20px var(--neon-red-glow);
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(45deg, var(--neon-green), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue-glow);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--neon-purple);
+            border-radius: 25px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green-glow);
+            transform: scale(1.02);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px 25px;
+            border: none;
+            border-radius: 35px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--neon-green), var(--neon-blue));
+            color: #000;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .result-display {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--neon-purple);
+            border-radius: 25px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .result-display.show {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green-glow);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .grade-result {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px var(--neon-green-glow);
+        }
+
+        .grade-description {
+            font-size: 1.3rem;
+            color: var(--neon-blue);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .percentage-display {
+            font-size: 1.1rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px var(--neon-purple-glow);
+        }
+
+        /* Optimized table styles */
+        .grade-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .grade-table th {
+            background: linear-gradient(45deg, var(--neon-green), var(--neon-blue));
+            color: #000;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 1rem;
+        }
+
+        .grade-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+        }
+
+        .grade-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Neon grade colors */
+        .grade-5 { 
+            background: rgba(0, 255, 136, 0.2) !important; 
+            color: var(--neon-green) !important; 
+            font-weight: 700; 
+            text-shadow: 0 0 10px var(--neon-green-glow);
+        }
+        .grade-4 { 
+            background: rgba(0, 212, 255, 0.2) !important; 
+            color: var(--neon-blue) !important; 
+            font-weight: 700; 
+            text-shadow: 0 0 10px var(--neon-blue-glow);
+        }
+        .grade-3 { 
+            background: rgba(255, 255, 0, 0.2) !important; 
+            color: var(--neon-yellow) !important; 
+            font-weight: 700; 
+            text-shadow: 0 0 10px var(--neon-yellow-glow);
+        }
+        .grade-2 { 
+            background: rgba(255, 102, 0, 0.2) !important; 
+            color: var(--neon-orange) !important; 
+            font-weight: 700; 
+            text-shadow: 0 0 10px var(--neon-orange-glow);
+        }
+        .grade-1 { 
+            background: rgba(255, 0, 102, 0.2) !important; 
+            color: var(--neon-red) !important; 
+            font-weight: 700; 
+            text-shadow: 0 0 10px var(--neon-red-glow);
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border-radius: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-blue) transparent;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            border-radius: 10px;
+        }
+
+        /* Custom Grade Button */
+        .custom-grade-btn {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+            color: #fff;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 35px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 30px auto;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px var(--neon-purple-glow);
+        }
+
+        .custom-grade-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--neon-purple-glow);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            border: 2px solid var(--neon-purple);
+            box-shadow: 0 0 30px var(--neon-purple-glow);
+        }
+
+        .footer h2 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--neon-purple);
+            text-shadow: 0 0 20px var(--neon-purple-glow);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 15px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            line-height: 1.6;
+        }
+
+        /* Loading animation - simplified for performance */
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--neon-green), var(--neon-blue), var(--neon-purple), transparent);
+            border-radius: 20px;
+            animation: loading 1.2s ease-in-out infinite;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .error {
+            background: rgba(255, 0, 64, 0.2) !important;
+            color: #ff0040 !important;
+            border-color: #ff0040 !important;
+            box-shadow: 0 0 20px rgba(255, 0, 64, 0.3) !important;
+        }
+
+        /* Optimize animations for better performance */
+        * {
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+
+        .container > * {
+            transform: translateZ(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <div class="logo">🧮</div>
+        </div>
+
+        <div class="header">
+            <h1 class="title">🇭🇺 Magyar Jegy Számológép</h1>
+            <p class="subtitle">Hungarian Grade Calculator</p>
+        </div>
+
+        <div class="grade-info">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--neon-green); font-size: 1.8rem; font-weight: 900;">Hungarian Grading System (1-5 Scale)</h2>
+            <div class="grade-scale">
+                <div class="grade-item">
+                    <div style="font-size: 2.5rem; color: var(--neon-green);">5</div>
+                    <div style="color: var(--neon-green);">Jeles (Excellent)</div>
+                    <div style="color: #fff;">90-100%</div>
+                </div>
+                <div class="grade-item">
+                    <div style="font-size: 2.5rem; color: var(--neon-blue);">4</div>
+                    <div style="color: var(--neon-blue);">Jó (Good)</div>
+                    <div style="color: #fff;">75-89%</div>
+                </div>
+                <div class="grade-item">
+                    <div style="font-size: 2.5rem; color: var(--neon-yellow);">3</div>
+                    <div style="color: var(--neon-yellow);">Közepes (Average)</div>
+                    <div style="color: #fff;">60-74%</div>
+                </div>
+                <div class="grade-item">
+                    <div style="font-size: 2.5rem; color: var(--neon-orange);">2</div>
+                    <div style="color: var(--neon-orange);">Elégséges (Sufficient)</div>
+                    <div style="color: #fff;">50-59%</div>
+                </div>
+                <div class="grade-item">
+                    <div style="font-size: 2.5rem; color: var(--neon-red);">1</div>
+                    <div style="color: var(--neon-red);">Elégtelen (Insufficient)</div>
+                    <div style="color: #fff;">0-49%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="calculator-grid">
+            <!-- Score to Grade Calculator (Blue Theme) -->
+            <div class="calculator-section blue-theme">
+                <h2 class="section-title">📊 Score to Grade</h2>
+                <div class="input-group">
+                    <label class="input-label">Your Score (points):</label>
+                    <input type="number" id="score" class="input-field" placeholder="85" min="0">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Maximum Score (points):</label>
+                    <input type="number" id="maxScore" class="input-field" placeholder="100" min="1">
+                </div>
+                <button class="btn" onclick="calculateGradeFromScore()">Calculate Grade</button>
+                <div class="result-display" id="scoreResult">
+                    <div>Enter your score to see your grade</div>
+                </div>
+            </div>
+
+            <!-- Percentage to Grade Calculator (Green Theme) -->
+            <div class="calculator-section green-theme">
+                <h2 class="section-title">📈 Percentage to Grade</h2>
+                <div class="input-group">
+                    <label class="input-label">Your Percentage (%):</label>
+                    <input type="number" id="percentage" class="input-field" placeholder="80" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Maximum Points (for reference):</label>
+                    <input type="number" id="maxPoints" class="input-field" placeholder="80" min="1">
+                </div>
+                <button class="btn" onclick="calculateGradeFromPercentage()">Calculate Grade</button>
+                <div class="result-display" id="percentageResult">
+                    <div>Enter your percentage to see your grade</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Grading Button -->
+        <button class="custom-grade-btn" onclick="goToCustomGrading()">
+            🎯 Custom Grading System
+        </button>
+
+        <!-- Grade Table Generator (Yellow Theme) -->
+        <div class="table-section yellow-theme">
+            <h2 class="section-title">📋 Grade Table Generator</h2>
+            <div class="input-group">
+                <label class="input-label">Maximum Possible Score:</label>
+                <input type="number" id="tableMaxScore" class="input-field" placeholder="10" min="1" max="100">
+            </div>
+            <button class="btn" onclick="generateGradeTable()">Generate Grade Table</button>
+            <div class="table-container" id="tableContainer" style="display: none;">
+                <table class="grade-table" id="gradeTable">
+                    <thead>
+                        <tr>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h2>MADE BY: DOMINIK</h2>
+            <div class="copyright">
+                © 2024 Hungarian Grade Calculator. All rights reserved.<br>
+                This software is protected by copyright law. Unauthorized reproduction,<br>
+                distribution, or modification is strictly prohibited.<br>
+                <strong>Licensed exclusively to the original user.</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hungarian grading system thresholds
+        const gradeThresholds = {
+            5: { min: 90, max: 100, name: "Jeles", description: "Excellent" },
+            4: { min: 75, max: 89, name: "Jó", description: "Good" },
+            3: { min: 60, max: 74, name: "Közepes", description: "Average" },
+            2: { min: 50, max: 59, name: "Elégséges", description: "Sufficient" },
+            1: { min: 0, max: 49, name: "Elégtelen", description: "Insufficient" }
+        };
+
+        function percentageToGrade(percentage) {
+            for (let grade = 5; grade >= 1; grade--) {
+                if (percentage >= gradeThresholds[grade].min) {
+                    return {
+                        grade: grade,
+                        name: gradeThresholds[grade].name,
+                        description: gradeThresholds[grade].description,
+                        percentage: Math.round(percentage * 100) / 100
+                    };
+                }
+            }
+            return {
+                grade: 1,
+                name: gradeThresholds[1].name,
+                description: gradeThresholds[1].description,
+                percentage: Math.round(percentage * 100) / 100
+            };
+        }
+
+        function calculateGradeFromScore() {
+            const score = parseFloat(document.getElementById('score').value);
+            const maxScore = parseFloat(document.getElementById('maxScore').value);
+            const resultDiv = document.getElementById('scoreResult');
+
+            if (isNaN(score) || isNaN(maxScore) || maxScore <= 0) {
+                showError(resultDiv, "Please enter valid numbers!");
+                return;
+            }
+
+            if (score < 0) {
+                showError(resultDiv, "Score cannot be negative!");
+                return;
+            }
+
+            if (score > maxScore) {
+                showError(resultDiv, "Score cannot be higher than maximum score!");
+                return;
+            }
+
+            // Add loading animation
+            resultDiv.classList.add('loading');
+            
+            setTimeout(() => {
+                const percentage = (score / maxScore) * 100;
+                const gradeInfo = percentageToGrade(percentage);
+                
+                displayResult(resultDiv, gradeInfo, `${score}/${maxScore} points`);
+                resultDiv.classList.remove('loading');
+            }, 500);
+        }
+
+        function calculateGradeFromPercentage() {
+            const percentage = parseFloat(document.getElementById('percentage').value);
+            const maxPoints = parseFloat(document.getElementById('maxPoints').value);
+            const resultDiv = document.getElementById('percentageResult');
+
+            if (isNaN(percentage)) {
+                showError(resultDiv, "Please enter a valid percentage!");
+                return;
+            }
+
+            if (percentage < 0 || percentage > 100) {
+                showError(resultDiv, "Percentage must be between 0 and 100!");
+                return;
+            }
+
+            // Add loading animation
+            resultDiv.classList.add('loading');
+            
+            setTimeout(() => {
+                const gradeInfo = percentageToGrade(percentage);
+                const pointsInfo = maxPoints && !isNaN(maxPoints) ? 
+                    `${Math.round((percentage/100) * maxPoints)}/${maxPoints} points` : 
+                    `${percentage}%`;
+                
+                displayResult(resultDiv, gradeInfo, pointsInfo);
+                resultDiv.classList.remove('loading');
+            }, 500);
+        }
+
+        function displayResult(resultDiv, gradeInfo, extraInfo) {
+            resultDiv.innerHTML = `
+                <div class="grade-result">${gradeInfo.grade}</div>
+                <div class="grade-description">${gradeInfo.name} (${gradeInfo.description})</div>
+                <div class="percentage-display">${extraInfo} = ${gradeInfo.percentage}%</div>
+            `;
+            resultDiv.classList.add('show');
+            
+            setTimeout(() => {
+                resultDiv.classList.remove('show');
+            }, 3000);
+        }
+
+        function showError(resultDiv, message) {
+            resultDiv.innerHTML = `<div style="font-weight: 600;">${message}</div>`;
+            resultDiv.classList.add('error');
+            
+            setTimeout(() => {
+                resultDiv.classList.remove('error');
+                resultDiv.innerHTML = '<div>Enter valid data to see your grade</div>';
+            }, 3000);
+        }
+
+        function generateGradeTable() {
+            const maxScore = parseInt(document.getElementById('tableMaxScore').value);
+            const tableContainer = document.getElementById('tableContainer');
+            const tableBody = document.getElementById('tableBody');
+
+            if (isNaN(maxScore) || maxScore <= 0 || maxScore > 100) {
+                alert("Please enter a valid maximum score (1-100)!");
+                return;
+            }
+
+            // Clear existing table
+            tableBody.innerHTML = '';
+            
+            // Add loading animation to the button
+            event.target.classList.add('loading');
+            
+            setTimeout(() => {
+                // Generate table rows for each possible score - optimized for performance
+                const fragment = document.createDocumentFragment();
+                
+                for (let score = 0; score <= maxScore; score++) {
+                    const percentage = (score / maxScore) * 100;
+                    const gradeInfo = percentageToGrade(percentage);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${score}</strong></td>
+                        <td>${gradeInfo.percentage}%</td>
+                        <td class="grade-${gradeInfo.grade}"><strong>${gradeInfo.grade}</strong></td>
+                        <td>${gradeInfo.name} (${gradeInfo.description})</td>
+                    `;
+                    
+                    fragment.appendChild(row);
+                }
+                
+                tableBody.appendChild(fragment);
+                tableContainer.style.display = 'block';
+                tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                event.target.classList.remove('loading');
+            }, 600);
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.id === 'score' || activeElement.id === 'maxScore') {
+                    calculateGradeFromScore();
+                } else if (activeElement.id === 'percentage' || activeElement.id === 'maxPoints') {
+                    calculateGradeFromPercentage();
+                } else if (activeElement.id === 'tableMaxScore') {
+                    generateGradeTable();
+                }
+            }
+        });
+
+        // Throttled input handlers for better performance
+        let inputTimeout;
+        
+        function throttledCalculateScore() {
+            clearTimeout(inputTimeout);
+            inputTimeout = setTimeout(() => {
+                const score = document.getElementById('score').value;
+                const maxScore = document.getElementById('maxScore').value;
+                if (score && maxScore) {
+                    calculateGradeFromScore();
+                }
+            }, 300);
+        }
+
+        function throttledCalculatePercentage() {
+            clearTimeout(inputTimeout);
+            inputTimeout = setTimeout(() => {
+                const percentage = document.getElementById('percentage').value;
+                if (percentage) {
+                    calculateGradeFromPercentage();
+                }
+            }, 300);
+        }
+
+        document.getElementById('score').addEventListener('input', throttledCalculateScore);
+        document.getElementById('maxScore').addEventListener('input', throttledCalculateScore);
+        document.getElementById('percentage').addEventListener('input', throttledCalculatePercentage);
+
+        // Navigation function
+        function goToCustomGrading() {
+            window.location.href = 'custom-grading.html';
+        }
+    </script>
+</body>
+</html>
