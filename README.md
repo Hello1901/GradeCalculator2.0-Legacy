@@ -2,7 +2,7 @@
 **THIS IS A LEGACY VERSION FROM NOW.**
 **Try to use the new and improved 3.0 version**
 
-Here is the URL where you can access the SITE: https://Hello1901.github.io/GradeCalculator
+Here is the URL where you can access the SITE: https://hello1901.github.io/GradeCalculator2.0-Legacy/
 
 **MADE BY: DOMINIK**
 
